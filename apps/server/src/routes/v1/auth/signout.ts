@@ -31,4 +31,4 @@ function parser(ctx: AppContext<true>): Id {
   return factory.id(ctx.query.id as string);
 }
 
-export default del("/signout/:id", validate(IdSchema, parser, signout));
+export default del("signout/:id", validate(IdSchema, parser, signout));

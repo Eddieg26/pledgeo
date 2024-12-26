@@ -66,4 +66,4 @@ export async function signin(
   }
 }
 
-export default post("/signin", validate(schema, parser, signin));
+export default post("signin", validate(schema, parser, signin));

@@ -43,11 +43,32 @@ export interface PasswordService {
 }
 
 export interface DatabaseService {
-  connect(): void;
-  disconnect(): void;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
 
   users(): UserService;
   sessions(): SessionService;
   campaigns(): CampaignService;
   passwords(): PasswordService;
+}
+
+export class Database implements DatabaseService {
+  connect(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  disconnect(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  users(): UserService {
+    throw new Error("Method not implemented.");
+  }
+  sessions(): SessionService {
+    throw new Error("Method not implemented.");
+  }
+  campaigns(): CampaignService {
+    throw new Error("Method not implemented.");
+  }
+  passwords(): PasswordService {
+    throw new Error("Method not implemented.");
+  }
 }

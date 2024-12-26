@@ -55,4 +55,4 @@ function parser(ctx: AppContext) {
   return { email, password, name };
 }
 
-export default post("/signup", validate(schema, parser, signup));
+export default post("signup", validate(schema, parser, signup));

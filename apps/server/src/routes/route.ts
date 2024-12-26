@@ -1,4 +1,5 @@
 import KoaRouter from "@koa/router";
+import { Middleware } from "koa";
 import { Result, ServerError, StatusCode } from "models";
 import { AppContext, AppState } from "../app/context";
 
@@ -60,12 +61,18 @@ export class Router {
     this.router = new KoaRouter();
   }
 
-  sub(router: Router) {
-    this.router.use(router.base, router.routes());
+  use(middleware: Middleware<AppState, AppContext>): Router {
+    this.router.use(middleware);
+    return this;
+  }
+
+  sub(router: Router): Router {
+    this.router.use(`${this.base}/${router.base}`, router.routes());
+    return this;
   }
 
   add<T>(route: Route<T>): Router {
-    const endpoint = `${this.base}${route.endpoint}`;
+    const endpoint = `${this.base}/${route.endpoint}`;
     switch (route.method) {
       case "GET":
         this.router.get(endpoint, wrapper(route.handler));
@@ -87,24 +94,29 @@ export class Router {
     return this;
   }
 
-  get<T>(endpoint: string, handler: Handler<T>) {
-    this.router.get(`${this.base}${endpoint}`, wrapper(handler));
+  get<T>(endpoint: string, handler: Handler<T>): Router {
+    this.router.get(`${this.base}/${endpoint}`, wrapper(handler));
+    return this;
   }
 
-  post<T>(endpoint: string, handler: Handler<T>) {
-    this.router.post(`${this.base}${endpoint}`, wrapper(handler));
+  post<T>(endpoint: string, handler: Handler<T>): Router {
+    this.router.post(`${this.base}/${endpoint}`, wrapper(handler));
+    return this;
   }
 
-  put<T>(endpoint: string, handler: Handler<T>) {
-    this.router.put(`${this.base}${endpoint}`, wrapper(handler));
+  put<T>(endpoint: string, handler: Handler<T>): Router {
+    this.router.put(`${this.base}/${endpoint}`, wrapper(handler));
+    return this;
   }
 
-  patch<T>(endpoint: string, handler: Handler<T>) {
-    this.router.patch(`${this.base}${endpoint}`, wrapper(handler));
+  patch<T>(endpoint: string, handler: Handler<T>): Router {
+    this.router.patch(`${this.base}/${endpoint}`, wrapper(handler));
+    return this;
   }
 
-  delete<T>(endpoint: string, handler: Handler<T>) {
-    this.router.delete(`${this.base}${endpoint}`, wrapper(handler));
+  delete<T>(endpoint: string, handler: Handler<T>): Router {
+    this.router.delete(`${this.base}/${endpoint}`, wrapper(handler));
+    return this;
   }
 
   routes() {
