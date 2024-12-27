@@ -113,7 +113,7 @@ export function internal(message: string, metadata?: any) {
   return new ServerError(StatusCode.SERVER_ERROR, message, metadata);
 }
 
-export default {
+export const factory = {
   id,
   email,
   password,
@@ -133,3 +133,5 @@ export default {
   bad_request,
   internal,
 };
+
+export default factory;

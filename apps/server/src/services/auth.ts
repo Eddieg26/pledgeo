@@ -1,8 +1,18 @@
 import bcrypt from "bcrypt";
 import dayjs from "dayjs";
 import jwt from "jsonwebtoken";
-import { Id, Nullable, Password, Result, Session, Token, User } from "models";
-import factory, { err, ok } from "models/src/factory";
+import {
+  err,
+  factory,
+  Id,
+  Nullable,
+  ok,
+  Password,
+  Result,
+  Session,
+  Token,
+  User,
+} from "models";
 import { v4 as uuid } from "uuid";
 import { AppContext } from "../app/context";
 
@@ -37,7 +47,7 @@ export class Auth implements AuthService {
     try {
       const user = jwt.verify(token, ctx.state.config.secret) as Id;
       return ok(user);
-    } catch (error) {
+    } catch (error: any) {
       return err(error.message);
     }
   }

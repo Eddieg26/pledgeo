@@ -1,4 +1,4 @@
-import {
+import type {
   Campaign,
   Either,
   Email,
@@ -53,12 +53,9 @@ export interface DatabaseService {
 }
 
 export class Database implements DatabaseService {
-  connect(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  disconnect(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
+  async connect(): Promise<void> {}
+  async disconnect(): Promise<void> {}
+
   users(): UserService {
     throw new Error("Method not implemented.");
   }

@@ -11,6 +11,7 @@ const services: Services = {
 };
 
 new App(config, services).start().then(({ server, app }) => {
+  console.log(`Server running on port ${config.port}`);
   server.on("close", () => {
     app.stop();
   });

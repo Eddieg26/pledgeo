@@ -2,11 +2,16 @@
   "name": "server",
   "version": "0.0.0",
   "description": "",
-  "private": true,
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist"
+  ],
+  "module": "commonjs",
   "license": "Apache-2.0",
   "keywords": [],
-  "main": "./src/main.ts",
   "scripts": {
+    "dev": "node ./dist/main.js",
     "build": "swc src -d dist --strip-leading-paths"
   },
   "dependencies": {
@@ -24,6 +29,7 @@
   "devDependencies": {
     "@swc/cli": "^0.5.2",
     "@swc/core": "^1.10.1",
+    "@types/node": "^22.10.2",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/koa": "^2.15.0",

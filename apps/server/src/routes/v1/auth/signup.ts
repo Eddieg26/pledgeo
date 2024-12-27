@@ -2,6 +2,7 @@ import {
   Email,
   EmailSchema,
   err,
+  factory,
   NameSchema,
   ok,
   Password,
@@ -11,7 +12,6 @@ import {
   unauthorized,
   User,
 } from "models";
-import factory from "models/src/factory";
 import { object } from "zod";
 import { AppContext } from "../../../app/context";
 import { validate } from "../../middleware";

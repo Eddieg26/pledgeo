@@ -1,5 +1,6 @@
 import {
   err,
+  factory,
   Id,
   IdSchema,
   ok,
@@ -7,7 +8,6 @@ import {
   ServerError,
   unauthorized,
 } from "models";
-import factory from "models/src/factory";
 import { AppContext } from "../../../app/context";
 import { validate } from "../../middleware";
 import { del } from "../../route";
