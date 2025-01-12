@@ -23,6 +23,9 @@ importers:
       '@koa/router':
         specifier: ^13.1.0
         version: 13.1.0
+      '@pledgeo/models':
+        specifier: workspace:^
+        version: link:../../packages/models
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
@@ -38,9 +41,6 @@ importers:
       koa-bodyparser:
         specifier: ^4.4.1
         version: 4.4.1
-      models:
-        specifier: workspace:^
-        version: link:../../packages/models
       radash:
         specifier: ^12.1.0
         version: 12.1.0
@@ -78,8 +78,8 @@ importers:
 
   apps/web:
     dependencies:
-      models:
-        specifier: workspace:*
+      '@pledgeo/models':
+        specifier: workspace:^
         version: link:../../packages/models
     devDependencies:
       '@eslint/compat':

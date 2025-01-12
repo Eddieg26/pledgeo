@@ -1,14 +1,14 @@
-import { err, ok, Result, ServerError, StatusCode } from "models";
+import { err, ok, Result, ServerError, StatusCode } from "@pledgeo/models";
 import { tryit } from "radash";
-import { Schema } from "zod";
+import { ZodType } from "zod";
 import { AppContext } from "../../app/context";
 
-export function validate<T, U>(
-  schema: Schema<T>,
-  parser: (ctx: AppContext) => T,
-  handler: (ctx: AppContext, args: T) => Promise<Result<U, ServerError>>
-): (ctx: AppContext) => Promise<Result<U, ServerError>> {
-  return async (ctx: AppContext) => {
+export function validate<T, U, AUTH extends boolean>(
+  schema: ZodType<T>,
+  parser: (ctx: AppContext<AUTH>) => T,
+  handler: (ctx: AppContext<AUTH>, args: T) => Promise<Result<U, ServerError>>
+): (ctx: AppContext<AUTH>) => Promise<Result<U, ServerError>> {
+  return async (ctx: AppContext<AUTH>) => {
     const args = parser(ctx);
     const validated = await schema.safeParseAsync(args);
     if (validated.success) {

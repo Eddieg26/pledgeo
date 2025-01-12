@@ -7,58 +7,56 @@ export type Password = Opaque<"Password", string>;
 export type Token = Opaque<"Token", string>;
 
 export interface User {
-  id: Id;
-  email: Email;
-  name: string;
+	id: Id;
+	email: Email;
+	name: string;
 }
 
 export interface Campaign {
-  id: Id;
-  name: string;
-  user_id: Id;
-  user?: User;
+	id: Id;
+	name: string;
+	user_id: Id;
+	user?: User;
 }
 
 export interface Session {
-  id: Id;
-  token: Token;
-  user: Id;
-  expires: Date;
-  attempts: number;
+	id: Id;
+	user: Id;
+	expires: Date;
 }
 
 export interface Pager<T> {
-  items: T[];
-  total: number;
-  page: number;
-  per_page: number;
+	items: T[];
+	total: number;
+	page: number;
+	per_page: number;
 }
 
 export enum StatusCode {
-  OK = 200,
-  CREATED = 201,
-  NO_CONTENT = 204,
-  BAD_REQUEST = 400,
-  UNAUTHORIZED = 401,
-  FORBIDDEN = 403,
-  NOT_FOUND = 404,
-  CONFLICT = 409,
-  SERVER_ERROR = 500,
+	OK = 200,
+	CREATED = 201,
+	NO_CONTENT = 204,
+	BAD_REQUEST = 400,
+	UNAUTHORIZED = 401,
+	FORBIDDEN = 403,
+	NOT_FOUND = 404,
+	CONFLICT = 409,
+	SERVER_ERROR = 500,
 }
 
 export class ServerError extends Error {
-  status: StatusCode;
-  metadata?: any;
+	status: StatusCode;
+	metadata?: any;
 
-  constructor(status: StatusCode, message: string, metadata?: any) {
-    super(message);
-    this.status = status;
-    this.metadata = metadata;
-  }
+	constructor(status: StatusCode, message: string, metadata?: any) {
+		super(message);
+		this.status = status;
+		this.metadata = metadata;
+	}
 
-  data<T>(): T | undefined {
-    return this.metadata ? (this.metadata as T) : undefined;
-  }
+	data<T>(): T | undefined {
+		return this.metadata ? (this.metadata as T) : undefined;
+	}
 }
 
 export type Ok<T> = { error: null; value: T };

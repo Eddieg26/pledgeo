@@ -1,7 +1,9 @@
-import { AuthService } from "./auth";
-import { DatabaseService } from "./database";
+import { Auth } from "./auth";
+import { Cache } from "./cache";
+import { Database } from "./database";
 
 export interface Services {
-  auth: AuthService;
-  database: DatabaseService;
+  auth: Auth;
+  database: Database;
+  cache: Cache;
 }

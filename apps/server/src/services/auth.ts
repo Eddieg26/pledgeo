@@ -1,99 +1,105 @@
+import {
+	factory,
+	Id,
+	Nullable,
+	Password,
+	Session,
+	User,
+} from "@pledgeo/models";
 import bcrypt from "bcrypt";
 import dayjs from "dayjs";
 import jwt from "jsonwebtoken";
-import {
-  err,
-  factory,
-  Id,
-  Nullable,
-  ok,
-  Password,
-  Result,
-  Session,
-  Token,
-  User,
-} from "models";
 import { v4 as uuid } from "uuid";
 import { AppContext } from "../app/context";
 
-export interface AuthService {
-  hash_password(password: Password, salt: number): Promise<string>;
-  compare_password(password: Password, hash: string): Promise<boolean>;
-  get_token(ctx: AppContext): Nullable<Token>;
-  get_session(ctx: AppContext): Promise<Nullable<Session>>;
-  validate_token(ctx: AppContext, token: Token): Result<Id, string>;
-  validate_session(session: Session): Result<boolean, string>;
-  create_session(ctx: AppContext, user: User): Promise<Session>;
-}
+export class Auth {
+	hash_password(password: Password, salt: number): Promise<string> {
+		return bcrypt.hash(password, salt);
+	}
 
-export class Auth implements AuthService {
-  hash_password(password: Password, salt: number): Promise<string> {
-    return bcrypt.hash(password, salt);
-  }
+	compare_password(password: Password, hash: string): Promise<boolean> {
+		return bcrypt.compare(password, hash);
+	}
 
-  compare_password(password: Password, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash);
-  }
+	async get_session(ctx: AppContext): Promise<Nullable<Session>> {
+		try {
+			const token = ctx.cookies.get("session");
+			if (!token) return null;
 
-  get_token(ctx: AppContext): Nullable<Token> {
-    const raw_token = ctx.cookies.get("session");
-    if (!raw_token) return null;
+			const { secret } = ctx.state.config;
+			const session_id = jwt.verify(token, secret) as Id;
+			const session = await ctx.services.cache.get<Session>(
+				`session:${session_id}`
+			);
+			return session;
+		} catch (error) {
+			await this.delete_session(ctx);
+			return null;
+		}
+	}
 
-    const token = factory.token(raw_token);
-    return token;
-  }
+	async create_session(ctx: AppContext, user: User): Promise<Session> {
+		const expires = dayjs().add(30, "day").toDate();
+		const session = {
+			id: factory.id(uuid()),
+			user: user.id,
+			expires,
+		};
 
-  validate_token(ctx: AppContext, token: Token): Result<Id, string> {
-    try {
-      const user = jwt.verify(token, ctx.state.config.secret) as Id;
-      return ok(user);
-    } catch (error: any) {
-      return err(error.message);
-    }
-  }
+		const token = jwt.sign(session.id, ctx.state.config.secret, {
+			expiresIn: "30d",
+		});
 
-  validate_session(session: Session): Result<boolean, string> {
-    if (session.expires < new Date()) return ok(false);
-    if (session.attempts >= 5) {
-      const expires = dayjs(session.expires).format("YYYY-MM-DD HH:mm:ss");
-      return err(`Too many attempts. Sign in locked until ${expires}`);
-    }
+		await ctx.services.cache.set(
+			`session:${session.id}`,
+			session,
+			30 * 24 * 60 * 60
+		);
 
-    return ok(true);
-  }
+		const sessions =
+			(await ctx.services.cache.get<string[]>(`sessions:${user.id}`)) ??
+			[];
 
-  async get_session(ctx: AppContext): Promise<Nullable<Session>> {
-    const token = this.get_token(ctx);
-    if (!token) return null;
+		sessions.push(session.id);
 
-    const user = this.validate_token(ctx, token);
-    if (user.error) {
-      ctx.cookies.set("session", "", { expires: new Date(0) });
-      return null;
-    }
+		await ctx.services.cache.set(
+			`sessions:${user.id}`,
+			sessions,
+			30 * 24 * 60 * 60
+		);
 
-    return await ctx.services.database.sessions().get({ right: token });
-  }
+		ctx.cookies.set("session", token, {
+			secure: ctx.state.config.env === "production",
+			expires,
+		});
 
-  async create_session(ctx: AppContext, user: User): Promise<Session> {
-    const expires = dayjs().add(30, "day").toDate();
-    const token = jwt.sign(user.id, ctx.state.config.secret, {
-      expiresIn: "30d",
-    });
+		return session;
+	}
 
-    ctx.cookies.set("session", token, {
-      secure: ctx.state.config.env === "production",
-      expires,
-    });
+	async delete_session(ctx: AppContext) {
+		try {
+			const session = await this.get_session(ctx);
+			if (!session) return true;
 
-    const session = {
-      id: factory.id(uuid()),
-      token: factory.token(token),
-      user: user.id,
-      expires,
-      attempts: 0,
-    };
+			await ctx.services.cache.delete(`session:${session.id}`);
+			ctx.cookies.set("session", "", { expires: new Date() });
 
-    return await ctx.services.database.sessions().insert(session);
-  }
+			let sessions =
+				(await ctx.services.cache.get<string[]>(
+					`sessions:${session.user}`
+				)) ?? [];
+
+			sessions = sessions.filter((id) => id !== session.id);
+
+			await ctx.services.cache.set(
+				`sessions:${session.user}`,
+				sessions,
+				30 * 24 * 60 * 60
+			);
+
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
 }

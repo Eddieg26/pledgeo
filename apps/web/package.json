@@ -15,7 +15,7 @@
 		"test": "npm run test:unit -- --run"
 	},
 	"dependencies": {
-		"models": "workspace:*"
+		"@pledgeo/models": "workspace:^"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.3",

@@ -1,34 +1,13 @@
-import {
-  err,
-  factory,
-  Id,
-  IdSchema,
-  ok,
-  Result,
-  ServerError,
-  unauthorized,
-} from "models";
-import { AppContext } from "../../../app/context";
-import { validate } from "../../middleware";
+import { ok, Result, ServerError } from "@pledgeo/models";
+import { AuthContext } from "../../../app";
+import { authenticate } from "../../middleware";
 import { del } from "../../route";
 
 export async function signout(
-  ctx: AppContext<true>,
-  id: Id
+	ctx: AuthContext
 ): Promise<Result<boolean, ServerError>> {
-  const { database } = ctx.services;
-  const session = await database.sessions().get({ left: id });
-  if (!session) return ok(true);
-
-  if (session.user !== ctx.state.user.id)
-    return err(unauthorized("Invalid session"));
-
-  await database.sessions().delete({ left: id });
-  return ok(true);
+	const result = await ctx.services.auth.delete_session(ctx);
+	return ok(result);
 }
 
-function parser(ctx: AppContext<true>): Id {
-  return factory.id(ctx.query.id as string);
-}
-
-export default del("signout/:id", validate(IdSchema, parser, signout));
+export default del("signout", authenticate(signout));

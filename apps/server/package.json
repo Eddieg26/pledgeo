@@ -21,7 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.15.3",
     "koa-bodyparser": "^4.4.1",
-    "models": "workspace:^",
+    "@pledgeo/models": "workspace:^",
     "radash": "^12.1.0",
     "uuid": "^11.0.3",
     "zod": "^3.24.1"

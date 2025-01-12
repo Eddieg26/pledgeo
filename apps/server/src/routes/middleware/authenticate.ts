@@ -1,22 +1,26 @@
-import { Result, ServerError, StatusCode } from "models";
+import { err, left, Result, ServerError, unauthorized } from "@pledgeo/models";
 import { AppContext } from "../../app/context";
 
-export function authenticate<U>(
-  route: (ctx: AppContext) => Promise<Result<U, ServerError>>
+export function authenticate<U, Ctx extends AppContext>(
+	route: (ctx: Ctx) => Promise<Result<U, ServerError>>
 ) {
-  return async (ctx: AppContext) => {
-    const { auth, database } = ctx.services;
+	return async (ctx: Ctx) => {
+		const { auth, database } = ctx.services;
 
-    const session = await auth.get_session(ctx);
-    if (!session)
-      return new ServerError(StatusCode.UNAUTHORIZED, "Unauthorized");
+		const session = await auth.get_session(ctx);
+		if (!session) return err(unauthorized("Unauthorized"));
 
-    const user = await database.users().get({ left: session.user });
-    if (!user) return new ServerError(StatusCode.UNAUTHORIZED, "Unauthorized");
+		if (session.expires < new Date()) {
+			await auth.delete_session(ctx);
+			return err(unauthorized("Session expired"));
+		}
 
-    ctx.state.session = session;
-    ctx.state.user = user;
+		const user = await database.users().get(left(session.user));
+		if (!user) return err(unauthorized("Unauthorized"));
 
-    return await route(ctx);
-  };
+		ctx.state.session = session;
+		ctx.state.user = user;
+
+		return await route(ctx);
+	};
 }

@@ -1,8 +1,14 @@
 import * as z from "zod";
 
-export const IdSchema = z.string().uuid();
-export const EmailSchema = z.string().email();
-export const PasswordSchema = z.string().min(8).max(255);
+function opaque<T extends string, V>(schema: z.ZodType<V>) {
+  return schema as z.ZodType<V & { __type: T }, any, V & { __type: T }>;
+}
+
+export const IdSchema = opaque<"Id", string>(z.string().uuid());
+export const EmailSchema = opaque<"Email", string>(z.string().email());
+export const PasswordSchema = opaque<"Password", string>(
+  z.string().min(8).max(255)
+);
 export const NameSchema = z.string().max(255);
 
 export const UserSchema = z.object({
