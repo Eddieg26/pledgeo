@@ -28,10 +28,10 @@ export function token(token: string): Token {
 	return token as Token;
 }
 
-export function user(id: Id, email: Email, name: string): User {
+export function user(id: string, email: string, name: string): User {
 	return {
-		id,
-		email,
+		id: id as Id,
+		email: email as Email,
 		name,
 	};
 }
@@ -80,11 +80,11 @@ export function todo(message?: string) {
 }
 
 export function left<L, R>(value: L): Either<L, R> {
-	return { left: value };
+	return { left: value, __type: "left" };
 }
 
 export function right<L, R>(value: R): Either<L, R> {
-	return { right: value };
+	return { right: value, __type: "right" };
 }
 
 export function unauthorized(message: string, metadata?: any) {
@@ -127,5 +127,3 @@ export const factory = {
 	bad_request,
 	internal,
 };
-
-export default factory;

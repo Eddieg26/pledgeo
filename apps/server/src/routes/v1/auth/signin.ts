@@ -1,7 +1,9 @@
-import factory, {
+import {
 	Email,
 	EmailSchema,
 	err,
+	factory,
+	internal,
 	ok,
 	Password,
 	PasswordSchema,
@@ -11,10 +13,11 @@ import factory, {
 	Session,
 	unauthorized,
 } from "@pledgeo/models";
+import { tryit } from "radash";
 import { object } from "zod";
 import { AppContext } from "../../../app/context";
 import { validate } from "../../middleware";
-import { post } from "../../route";
+import { post } from "../../middleware/route";
 
 type SigninArgs = {
 	email: Email;
@@ -48,7 +51,10 @@ export async function signin(
 	if (!(await auth.compare_password(args.password, password)))
 		return err(unauthorized("Invalid email or password"));
 
-	return ok(await auth.create_session(ctx, user));
+	const [error, session] = await tryit(auth.create_session)(ctx, user);
+
+	if (error) return err(internal(error.message));
+	else return ok(session);
 }
 
-export default post("signin", validate(schema, parser, signin));
+export default post("/signin", validate(schema, parser, signin));

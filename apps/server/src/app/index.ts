@@ -15,8 +15,8 @@ export class App {
 		this.config = config;
 		this.services = services;
 		this.server = new Koa();
+		this.server.context.services = this.services;
 		this.server.use(async (ctx, next) => {
-			ctx.services = this.services;
 			ctx.state.config = this.config;
 
 			await next();

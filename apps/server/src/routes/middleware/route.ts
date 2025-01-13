@@ -1,7 +1,7 @@
 import KoaRouter from "@koa/router";
 import { Result, ServerError, StatusCode } from "@pledgeo/models";
 import { Middleware } from "koa";
-import { AppContext, AppState } from "../app/context";
+import { AppContext, AppState } from "../../app";
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export type Handler<T, Ctx extends AppContext> = (
@@ -73,12 +73,10 @@ function wrapper<T, Ctx extends AppContext>(handler: Handler<T, Ctx>) {
 }
 
 export class Router {
-	base: string;
 	private router: KoaRouter<AppState, AppContext>;
 
-	constructor(base: string = "") {
-		this.base = base;
-		this.router = new KoaRouter();
+	constructor(prefix: string = "") {
+		this.router = new KoaRouter({ prefix });
 	}
 
 	use(middleware: Middleware<AppState, AppContext>): Router {
@@ -87,12 +85,12 @@ export class Router {
 	}
 
 	sub(router: Router): Router {
-		this.router.use(`${this.base}/${router.base}`, router.routes());
+		this.router.use(router.routes());
 		return this;
 	}
 
 	add<T, Ctx extends AppContext>(route: Route<T, Ctx>): Router {
-		const endpoint = `${this.base}/${route.endpoint}`;
+		const endpoint = route.endpoint;
 		switch (route.method) {
 			case "GET":
 				this.router.get(endpoint, wrapper(route.handler));
@@ -118,7 +116,7 @@ export class Router {
 		endpoint: string,
 		handler: Handler<T, Ctx>
 	): Router {
-		this.router.get(`${this.base}/${endpoint}`, wrapper(handler));
+		this.router.get(endpoint, wrapper(handler));
 		return this;
 	}
 
@@ -126,7 +124,7 @@ export class Router {
 		endpoint: string,
 		handler: Handler<T, Ctx>
 	): Router {
-		this.router.post(`${this.base}/${endpoint}`, wrapper(handler));
+		this.router.post(endpoint, wrapper(handler));
 		return this;
 	}
 
@@ -134,7 +132,7 @@ export class Router {
 		endpoint: string,
 		handler: Handler<T, Ctx>
 	): Router {
-		this.router.put(`${this.base}/${endpoint}`, wrapper(handler));
+		this.router.put(endpoint, wrapper(handler));
 		return this;
 	}
 
@@ -142,7 +140,7 @@ export class Router {
 		endpoint: string,
 		handler: Handler<T, Ctx>
 	): Router {
-		this.router.patch(`${this.base}/${endpoint}`, wrapper(handler));
+		this.router.patch(endpoint, wrapper(handler));
 		return this;
 	}
 
@@ -150,7 +148,7 @@ export class Router {
 		endpoint: string,
 		handler: Handler<T, Ctx>
 	): Router {
-		this.router.delete(`${this.base}/${endpoint}`, wrapper(handler));
+		this.router.delete(endpoint, wrapper(handler));
 		return this;
 	}
 

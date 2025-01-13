@@ -27,9 +27,9 @@ export class Auth {
 			if (!token) return null;
 
 			const { secret } = ctx.state.config;
-			const session_id = jwt.verify(token, secret) as Id;
+			const { id } = jwt.verify(token, secret) as { id: Id };
 			const session = await ctx.services.cache.get<Session>(
-				`session:${session_id}`
+				`session:${id}`
 			);
 			return session;
 		} catch (error) {
@@ -46,8 +46,8 @@ export class Auth {
 			expires,
 		};
 
-		const token = jwt.sign(session.id, ctx.state.config.secret, {
-			expiresIn: "30d",
+		const token = jwt.sign({ id: session.id }, ctx.state.config.secret, {
+			expiresIn: "30 days",
 		});
 
 		await ctx.services.cache.set(

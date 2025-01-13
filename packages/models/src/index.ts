@@ -64,8 +64,8 @@ export type Err<E> = { value: null; error: E };
 export type Result<T, E> = Ok<T> | Err<E>;
 export const Empty = {};
 
-export type Left<T> = { left: T };
-export type Right<T> = { right: T };
+export type Left<T> = { left: T, __type: "left" };
+export type Right<T> = { right: T, __type: "right"  };
 export type Either<L, R> = Left<L> | Right<R>;
 
 export * from "./factory";

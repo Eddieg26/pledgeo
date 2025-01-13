@@ -1,6 +1,5 @@
-import { Router } from "./route";
+import health from "./health";
+import { Router } from "./middleware/route";
 import v1 from "./v1";
 
-const routes = new Router().sub(v1);
-
-export default routes;
+export default new Router().sub(health).sub(v1);

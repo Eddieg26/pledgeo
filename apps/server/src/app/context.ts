@@ -11,10 +11,10 @@ export type AppState<AUTH extends boolean = false> = {
 
 export type AuthContext = ParameterizedContext<
 	AppState<true>,
-	{ services: Services }
+	{ services: Services; params: any }
 >;
 export type UnauthContext = ParameterizedContext<
 	AppState<false>,
-	{ services: Services }
+	{ services: Services; params: any }
 >;
 export type AppContext = AuthContext | UnauthContext;

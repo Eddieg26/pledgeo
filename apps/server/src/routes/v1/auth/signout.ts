@@ -1,7 +1,7 @@
 import { ok, Result, ServerError } from "@pledgeo/models";
 import { AuthContext } from "../../../app";
 import { authenticate } from "../../middleware";
-import { del } from "../../route";
+import { del } from "../../middleware/route";
 
 export async function signout(
 	ctx: AuthContext
@@ -10,4 +10,4 @@ export async function signout(
 	return ok(result);
 }
 
-export default del("signout", authenticate(signout));
+export default del("/signout", authenticate(signout));

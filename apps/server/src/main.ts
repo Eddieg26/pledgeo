@@ -1,18 +1,18 @@
+import "dotenv/config";
 import { App } from "./app";
 import { Config } from "./config";
-import { Services } from "./services";
-import { Auth } from "./services/auth";
-import { PgDatabase } from "./services/database";
+import { Auth, DrizzleDb, RedisCache, Services } from "./services";
 
 const config = new Config();
 const services: Services = {
-  auth: new Auth(),
-  database: new PgDatabase(),
+	auth: new Auth(),
+	database: new DrizzleDb(config),
+	cache: new RedisCache(config),
 };
 
 new App(config, services).start().then(({ server, app }) => {
-  console.log(`Server running on port ${config.port}`);
-  server.on("close", () => {
-    app.stop();
-  });
+	console.log("Server started", config);
+	server.on("close", () => {
+		app.stop();
+	});
 });

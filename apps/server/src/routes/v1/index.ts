@@ -1,6 +1,4 @@
-import { Router } from "../route";
+import { Router } from "../middleware/route";
 import auth from "./auth";
 
-const v1 = new Router("v1").sub(auth);
-
-export default v1;
+export default new Router("/v1").sub(auth);

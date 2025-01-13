@@ -1,22 +1,24 @@
 import {
-  Email,
-  EmailSchema,
-  err,
-  factory,
-  NameSchema,
-  ok,
-  Password,
-  PasswordSchema,
-  Result,
-  right,
-  ServerError,
-  unauthorized,
-  User,
+	Email,
+	EmailSchema,
+	err,
+	factory,
+	internal,
+	NameSchema,
+	ok,
+	Password,
+	PasswordSchema,
+	Result,
+	right,
+	ServerError,
+	unauthorized,
+	User,
 } from "@pledgeo/models";
+import { tryit } from "radash";
 import { object } from "zod";
 import { AppContext } from "../../../app/context";
 import { validate } from "../../middleware";
-import { post } from "../../route";
+import { post } from "../../middleware/route";
 
 export async function signup(
 	ctx: AppContext,
@@ -27,12 +29,19 @@ export async function signup(
 	if (await database.users().get(right(args.email)))
 		return err(unauthorized("Email already in use"));
 
-	const password = await auth.hash_password(
+	const password = (await auth.hash_password(
 		args.password,
 		ctx.state.config.salt
-	);
+	)) as Password;
 
-	const user = await database.users().create(args.email, password, args.name);
+	const user = await database.users().create(args.email, args.name);
+
+	const [error] = await tryit(database.passwords().create)(user.id, password);
+	if (error) {
+		await database.users().delete(user.id);
+		return err(internal("Failed to sign up", { message: error.message }));
+	}
+
 	return ok(user);
 }
 
@@ -56,4 +65,4 @@ const schema = object({
 	name: NameSchema,
 });
 
-export default post("signup", validate(schema, parser, signup));
+export default post("/signup", validate(schema, parser, signup));
